@@ -1,64 +1,56 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <math.h>
+
+#define SIZE 10
 
 int main() {
-    int m, n;
+    double array[SIZE];
+    double sum = 0.0, average;
+    int i, closest_index;
+    double min_diff;
+    int first_negative_index = -1, second_positive_index = -1;
+    double sum_between = 0.0;
 
-    printf("Введіть кількість рядків (M): ");
-    scanf("%d", &m);
-    printf("Введіть кількість стовпців (N): ");
-    scanf("%d", &n);
-
-    if (m < 2) {
-        printf("Матриця повинна мати щонайменше два рядки для виконання операції.\n");
-        return 1; 
+    printf("Введіть %d дійсних чисел:\n", SIZE);
+    for (i = 0; i < SIZE; i++) {
+        scanf("%lf", &array[i]);
+        sum += array[i];
     }
 
-    int **B = (int **)malloc(m * sizeof(int *));
-    if (B == NULL) {
-        printf("Помилка виділення пам'яті.\n");
-        return 1;
-    }
-    for (int i = 0; i < m; i++) {
-        B[i] = (int *)malloc(n * sizeof(int));
-        if (B[i] == NULL) {
-            printf("Помилка виділення пам'яті.\n");
-            for (int j = 0; j < i; j++) {
-                free(B[j]);
-            }
-            free(B);
-            return 1; 
+    average = sum / SIZE;
+
+    closest_index = 0;
+    min_diff = fabs(array[0] - average);
+    for (i = 1; i < SIZE; i++) {
+        double diff = fabs(array[i] - average);
+        if (diff < min_diff) {
+            min_diff = diff;
+            closest_index = i;
         }
     }
 
-    printf("Введіть елементи матриці:\n");
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("B[%d][%d] = ", i, j);
-            scanf("%d", &B[i][j]);
+    for (i = 0; i < SIZE; i++) {
+        if (array[i] < 0 && first_negative_index == -1) {
+            first_negative_index = i;
+        }
+        if (array[i] > 0 && first_negative_index != -1 && second_positive_index == -1 && i > first_negative_index) {
+            second_positive_index = i;
+            break;
         }
     }
 
-    int secondRowIndex = 1; 
-    int lastRowIndex = m - 1;      
-
-    for (int j = 0; j < n; j++) {
-        B[secondRowIndex][j] = B[secondRowIndex][j] + B[lastRowIndex][j];
-    }
-
-   
-    printf("\nОновлена матриця B:\n");
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%d\t", B[i][j]);
+    if (first_negative_index != -1 && second_positive_index != -1 && second_positive_index > first_negative_index) {
+        for (i = first_negative_index + 1; i < second_positive_index; i++) {
+            sum_between += array[i];
         }
-        printf("\n");
     }
 
-    for (int i = 0; i < m; i++) {
-        free(B[i]);
+    printf("Номер елемента, найближчого до середнього арифметичного: %d\n", closest_index);
+    if (first_negative_index != -1 && second_positive_index != -1 && second_positive_index > first_negative_index) {
+        printf("Сума елементів між першим від'ємним та другим додатним: %.2lf\n", sum_between);
+    } else {
+        printf("Не вдалося знайти перший від'ємний та другий додатний елементи, або вони розташовані неправильно.\n");
     }
-    free(B);
 
-    return 0; 
+    return 0;
 }
